@@ -1,0 +1,13 @@
+application
+.vscode
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+CMakeFiles
+build
+jellyfish.sln
+*.vcxproj
+*.filters
+Win32
+Debug
+jellyfish.dir
