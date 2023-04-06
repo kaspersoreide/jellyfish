@@ -2,14 +2,20 @@
 #define GLM_FORCE_RADIANS
 #include <iostream>
 #include <GL/glew.h>
-#include "glm/ext.hpp"
-#include "glm/gtx/matrix_decompose.hpp"
-#include "glm/gtc/quaternion.hpp"
+#include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 #include <vector>
 #include "glm/gtc/matrix_transform.hpp"
+#include "framebuffer.h"
+#include "renderer.h"
+
+#include "jellyfish.h"
+
+using namespace glm;
 
 GLFWwindow* window;
+Renderer* renderer;
+vec2 cameraAngles(0.0f, 0.0f);
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	switch(key) {
@@ -47,6 +53,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				0, 0,
 				1920, 1080, 30
 			);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		} else {
 			glfwSetWindowMonitor(
 				window,
@@ -54,6 +61,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				40, 40,
 				1280, 720, GLFW_DONT_CARE
 			);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 		
 		break;
@@ -64,18 +72,23 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void init() {
 	glfwInit();
-	window = glfwCreateWindow(1280, 720, "<3", NULL, NULL);
+	window = glfwCreateWindow(1920, 1080, "<3", glfwGetPrimaryMonitor(), NULL);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glfwSetKeyCallback(window, keyCallback);
+
+	renderer = new Renderer();
 }
 
 
 int main() {
 	init();
+
+	Jellyfish jellyfish;
 
 	glm::mat4 Projection = glm::perspective(
 		1.2f,
@@ -84,14 +97,19 @@ int main() {
 		100.0f
 	);
 	glm::mat4 View = glm::lookAt(
-		glm::vec3(0.0f, 0.0f, -5.0f),
+		glm::vec3(0.0f, -5.0f, 0.0f),
 		glm::vec3(0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f)
+		glm::vec3(0.0f, 0.0f, 1.0f)
 	);
 	glm::mat4 VP = Projection * View;
 
 	while (!glfwWindowShouldClose(window)) {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		renderer->buffers[0]->bind();
+		renderer->renderJellyfish(&jellyfish, VP);
+		renderer->renderToScreen();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

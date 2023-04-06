@@ -7,11 +7,12 @@ endif(COMMAND cmake_policy)
 project(jellyfish)
 
 if (WIN32)
-    # windows configuration, if your libraries are in a different location, change this
+    # my windows configuration, if your libraries are in a different location, change this
     set(glfw3_DIR "/Program Files (x86)/GLFW/lib/cmake/glfw3")
     include_directories("/Program Files (x86)/glew/include")
 
 else (WIN32)
+    # linux and mac, assume glew can be found by cmake
     find_package(GLEW REQUIRED)
 endif (WIN32)
 
@@ -34,10 +35,9 @@ file(GLOB_RECURSE all_srcs
 add_compile_definitions(GLEW_NO_GLU GLEW_STATIC)
 
 add_executable(jellyfish ${all_srcs})
-target_link_libraries(jellyfish glm::glm OpenGL::GL glfw)
 
 if (WIN32)
-    target_link_libraries(jellyfish "/Program Files (x86)/glew/lib/Release/Win32/glew32s.lib")
+    target_link_libraries(jellyfish glm::glm OpenGL::GL glfw "/Program Files (x86)/glew/lib/Release/Win32/glew32s.lib")
 else (WIN32)
-    target_link_libraries(jellyfish GLEW::glew)
+    target_link_libraries(jellyfish glm::glm OpenGL::GL glfw GLEW::glew)
 endif (WIN32)
