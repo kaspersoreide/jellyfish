@@ -11,7 +11,7 @@ public:
     void drawFullscreenQuad();
     void swapBuffers();
     void bloom();
-    void renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP);
+    void renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t);
     void renderToScreen(bool bloomEnabled = false);
 };
 

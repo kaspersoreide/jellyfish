@@ -37,7 +37,7 @@ Renderer::Renderer() {
 void Renderer::swapBuffers() {
     Framebuffer* tmp = buffers[0];
     buffers[0] = buffers[1];
-    buffers[1] = buffers[0];
+    buffers[1] = tmp;
 }
 
 void Renderer::drawFullscreenQuad() {
@@ -51,23 +51,30 @@ void Renderer::drawFullscreenQuad() {
 
 void Renderer::bloom() {
     glUseProgram(bloomShader);
-    glUniform1i(0, 0);
-    buffers[1]->bind();
+    
     //set to vertical smoothing
     glUniform1i(1, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffers[1]->framebuffer);
     glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
     drawFullscreenQuad();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    swapBuffers();
+    
+    //horizontal smoothing
     glUniform1i(1, 1);
-    buffers[0]->bind();
-    glBindTexture(GL_TEXTURE_2D, buffers[1]->texture);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffers[1]->framebuffer);
+    glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
     drawFullscreenQuad();
-
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    swapBuffers();   
 }
 
-void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP) {
+void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t) {
     glUseProgram(jellyfishShader);
     glBindVertexArray(jellyfish->VAO);
     glUniformMatrix4fv(0, 1, GL_FALSE, &VP[0][0]);
+    glUniform1f(1, t);
+    glPointSize(2.0f);
     glDrawArrays(GL_POINTS, 0, jellyfish->numVertices);
 }
 
@@ -75,9 +82,16 @@ void Renderer::renderToScreen(bool bloomEnabled) {
     if (bloomEnabled) {
         bloom();
     }
-    glUseProgram(framebufferShader);
-    buffers[0]->unbind();
-    glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
-    glUniform1i(0, 0);
-    drawFullscreenQuad();
+    glBlitNamedFramebuffer(
+        buffers[0]->framebuffer, 0,
+        0, 0, 1920, 1080,
+        0, 0, 1920, 1080,
+        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
+        GL_NEAREST
+    );
+    //glUseProgram(framebufferShader);
+    //buffers[0]->unbind();
+    //glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
+    //glUniform1i(0, 0);
+    //drawFullscreenQuad();
 } 

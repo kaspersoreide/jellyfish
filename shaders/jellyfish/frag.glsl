@@ -5,5 +5,6 @@ in vec3 vertexColor;
 out vec3 FragColor;
 
 void main() {
-  FragColor = vertexColor;
+  //float originalZ = gl_FragCoord.z / gl_FragCoord.w;
+  FragColor = 5.0 * vertexColor;
 }

@@ -8,6 +8,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "framebuffer.h"
 #include "renderer.h"
+#include <chrono>
 
 #include "jellyfish.h"
 
@@ -15,25 +16,30 @@ using namespace glm;
 
 GLFWwindow* window;
 Renderer* renderer;
-vec2 cameraAngles(0.0f, 0.0f);
+struct {
+	float theta, phi;
+} cameraAngles;
+struct {
+	bool left, right, up, down;
+} controller;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	switch(key) {
 	case  GLFW_KEY_LEFT: 
-		if (action == GLFW_PRESS);
-		if (action == GLFW_RELEASE);
+		if (action == GLFW_PRESS) controller.left = true;
+		if (action == GLFW_RELEASE) controller.left = false;
 		break;
 	case  GLFW_KEY_RIGHT: 
-		if (action == GLFW_PRESS);
-		if (action == GLFW_RELEASE);
+		if (action == GLFW_PRESS) controller.right = true;
+		if (action == GLFW_RELEASE) controller.right = false;
 		break;
 	case  GLFW_KEY_UP: 
-		if (action == GLFW_PRESS);
-		if (action == GLFW_RELEASE);
+		if (action == GLFW_PRESS) controller.up = true;
+		if (action == GLFW_RELEASE) controller.up = false;
 		break;
 	case  GLFW_KEY_DOWN: 
-		if (action == GLFW_PRESS);
-		if (action == GLFW_RELEASE);
+		if (action == GLFW_PRESS) controller.down = true;
+		if (action == GLFW_RELEASE) controller.down = false;
 		break;
 	case  GLFW_KEY_ESCAPE: 	//Disable fullscreen and close the application
 		glfwSetWindowMonitor(
@@ -82,10 +88,44 @@ void init() {
 	glfwSetKeyCallback(window, keyCallback);
 
 	renderer = new Renderer();
+	cameraAngles.phi = 3.1415926f / 2;
+	cameraAngles.theta = 0.0f;
+	controller.up = false;
+	controller.down = false;
+	controller.left = false;
+	controller.right = false;
 }
 
+void moveCamera() {
+	const float speed = 0.01f;
+	if (controller.left) {
+		cameraAngles.theta -= speed;
+	}
+	if (controller.right) {
+		cameraAngles.theta += speed;
+	}
+	if (controller.up) {
+		cameraAngles.phi += speed;
+	}
+	if (controller.down) {
+		cameraAngles.phi -= speed;
+	}
+}
+
+vec3 getCameraPos(float phi, float theta) {
+	return {
+		sinf(phi) * cosf(theta),
+		sinf(phi) * sinf(theta),
+		cosf(phi)
+	};
+}
 
 int main() {
+	typedef std::chrono::high_resolution_clock Time;
+    typedef std::chrono::duration<float> fsec;
+    auto t0 = Time::now();
+    
+
 	init();
 
 	Jellyfish jellyfish;
@@ -106,10 +146,21 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+		auto t1 = Time::now();
+    	fsec fs = t1 - t0;
+		moveCamera();
 		renderer->buffers[0]->bind();
-		renderer->renderJellyfish(&jellyfish, VP);
-		renderer->renderToScreen();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//cameraAngles.x += 0.001f;
+		View = glm::lookAt(
+			5.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		);
+		VP = Projection * View;
+
+		renderer->renderJellyfish(&jellyfish, VP, fs.count());
+		renderer->renderToScreen(true);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

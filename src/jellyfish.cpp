@@ -16,15 +16,28 @@ void Jellyfish::createGeometry() {
 
     //generate points on a sphere by using fibonacci sphere algorithm
     vector<vec3> vertices;
-    int n = 1200;
+    int n = 1000;
     const float goldenRatio = 0.5f * (1.0f + sqrtf(5.0f));
     for (int i = 0; i < n; i++) {
         float theta = 2 * PI * i / goldenRatio;
         float phi = acosf(1.0f - 2.0f * (i + 0.5f) / n);
         vec3 vertex = { cosf(theta) * sinf(phi), sinf(theta) * sinf(phi), cosf(phi) };
-        if (vertex.z > 0.1 * sinf(12 * theta)) {
+        if (vertex.z > 0.05 * sinf(8 * theta)) {
             vertices.push_back(vertex);
             vertices.push_back({1.0f, 1.0f, 1.0f});
+        }
+    }
+    //generate "arms"
+    const int numArms = 8;
+    const int k = 50;
+    for (int i = 0; i < numArms; i++) {
+        float angle = i * 2.0 * PI / numArms;
+        float x = 0.8 * cosf(angle);
+        float y = 0.8 * sinf(angle);
+        for (int j = 0; j < k; j++) {
+            float z = - 2.0 * float(j) / k;
+            vertices.push_back({ x, y, z });
+            vertices.push_back({0.5, 0.2, 0.8});
         }
     }
     VAO = vertexArray2x3f(vertices);
