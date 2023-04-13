@@ -160,7 +160,7 @@ int main() {
 		VP = Projection * View;
 
 		renderer->renderJellyfish(&jellyfish, VP, fs.count());
-		renderer->renderToScreen(true);
+		renderer->renderToScreen();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

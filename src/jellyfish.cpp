@@ -24,7 +24,7 @@ void Jellyfish::createGeometry() {
         vec3 vertex = { cosf(theta) * sinf(phi), sinf(theta) * sinf(phi), cosf(phi) };
         if (vertex.z > 0.05 * sinf(8 * theta)) {
             vertices.push_back(vertex);
-            vertices.push_back({1.0f, 1.0f, 1.0f});
+            vertices.push_back({90.0f / 255, 134.0f / 255, 173.0f / 255});
         }
     }
     //generate "arms"
