@@ -19,8 +19,7 @@ const float weights[N] = {
     0.1216216, 
     0.054054, 
     0.016216 
-};
-*/
+};*/
 
 const int M = 16;
 const int N = 2 * M + 1;
@@ -62,6 +61,7 @@ const float weights[N] = {
 };
 
 
+
 void main() {
     vec2 pixelOffset = 1.0 / textureSize(image, 0);
     vec3 color = vec3(0.0);
@@ -78,5 +78,5 @@ void main() {
 
     //color += 0.5 * vec3(texture(image, uv + vec2(0.0, 0.0)).r, 0.0, 0.0);
     //color += 0.5 * vec3(0.0, 0.0, texture(image, uv + vec2(0.0, pixelOffset.y)).b);
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(1.2 * color, 1.0);
 }

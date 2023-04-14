@@ -3,10 +3,63 @@
 Renderer::Renderer() {
     jellyfishShader = loadShaders("shaders/jellyfish/vert.glsl", "shaders/jellyfish/frag.glsl");
     bloomShader = loadShaders("shaders/bloom/vert.glsl", "shaders/bloom/frag.glsl");
-    framebufferShader = loadShaders("shaders/framebuffer/vert.glsl", "shaders/bloom/frag.glsl");
+    screenShader = loadShaders("shaders/screen/vert.glsl", "shaders/screen/frag.glsl");
+    copyShader = loadShaders("shaders/copy/vert.glsl", "shaders/copy/frag.glsl");
 
     buffers[0] = new Framebuffer(1920, 1080, FB_FLOAT);
     buffers[1] = new Framebuffer(1920, 1080, FB_FLOAT);
+
+    // make hdr framebuffer with 2 color attachments
+    // 1 for dark and 1 for bright colors
+    glGenFramebuffers(1, &hdrFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glGenTextures(2, colorBuffers);
+    for (unsigned int i = 0; i < 2; i++)
+    {
+        glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA16F, 1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // attach texture to framebuffer
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0
+        );
+    }  
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1920, 1080);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+    unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments); 
+    
+    glGenFramebuffers(2, pingpongFBO);
+    glGenTextures(2, pingpongTextures);
+    for (unsigned int i = 0; i < 2; i++)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+        glBindTexture(GL_TEXTURE_2D, pingpongTextures[i]);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA16F, 1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTextures[i], 0
+        );
+        // also check if framebuffers are complete (no need for depth buffer)
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "Framebuffer not complete!" << std::endl;
+    }
+    
 
     //gen screen quad VAO
 	GLuint VBO;
@@ -34,6 +87,13 @@ Renderer::Renderer() {
 	);
 }
 
+void Renderer::copyFramebuffer(GLuint srcTexture, GLuint dstFramebuffer) {
+    glUseProgram(copyShader);
+    glBindTexture(GL_TEXTURE_2D, srcTexture);
+    glBindFramebuffer(GL_FRAMEBUFFER, dstFramebuffer);
+    drawFullscreenQuad();
+}
+
 void Renderer::swapBuffers() {
     Framebuffer* tmp = buffers[0];
     buffers[0] = buffers[1];
@@ -51,25 +111,35 @@ void Renderer::drawFullscreenQuad() {
 
 void Renderer::bloom() {
     glUseProgram(bloomShader);
-    
+    glActiveTexture(GL_TEXTURE0);
     //set to vertical smoothing
     glUniform1i(1, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, buffers[1]->framebuffer);
-    glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
+    glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[1]);
+    glBindTexture(GL_TEXTURE_2D, pingpongTextures[0]);
     drawFullscreenQuad();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    swapBuffers();
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //swapBuffers();
     
     //horizontal smoothing
     glUniform1i(1, 1);
-    glBindFramebuffer(GL_FRAMEBUFFER, buffers[1]->framebuffer);
-    glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
+    glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[0]);
+    glBindTexture(GL_TEXTURE_2D, pingpongTextures[1]);
     drawFullscreenQuad();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    swapBuffers();   
+    glBindTexture(GL_TEXTURE_2D, 0); 
+}
+
+void Renderer::clear() {
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    for (int i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }
 
 void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t) {
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     glUseProgram(jellyfishShader);
     glBindVertexArray(jellyfish->VAO);
     glUniformMatrix4fv(0, 1, GL_FALSE, &VP[0][0]);
@@ -80,18 +150,22 @@ void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t) {
 
 void Renderer::renderToScreen(bool bloomEnabled) {
     if (bloomEnabled) {
-        bloom();
+        copyFramebuffer(colorBuffers[1], pingpongFBO[0]);
+        for (int i = 0; i < 1; i++)
+            bloom();
     }
-    glBlitNamedFramebuffer(
-        buffers[0]->framebuffer, 0,
-        0, 0, 1920, 1080,
-        0, 0, 1920, 1080,
-        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
-        GL_NEAREST
-    );
-    //glUseProgram(framebufferShader);
-    //buffers[0]->unbind();
-    //glBindTexture(GL_TEXTURE_2D, buffers[0]->texture);
-    //glUniform1i(0, 0);
-    //drawFullscreenQuad();
+    copyFramebuffer(colorBuffers[1], pingpongFBO[0]);
+    for (int i = 0; i < 2; i++) bloom();
+    //copyFramebuffer(pingpongTextures[0], 0);
+    
+    glUseProgram(screenShader);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+    glActiveTexture(GL_TEXTURE1);
+    glUniform1i(1, 1);
+    glBindTexture(GL_TEXTURE_2D, pingpongTextures[0]);
+    drawFullscreenQuad();
+    glActiveTexture(GL_TEXTURE0);
+    
 } 

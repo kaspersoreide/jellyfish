@@ -1,0 +1,21 @@
+#version 430 core
+
+in vec2 texCoords;
+out vec4 FragColor;
+
+layout(location = 0) uniform sampler2D screenTex;
+layout(location = 1) uniform sampler2D bloomTex;
+
+void main() {
+	const float exposure = 0.5;
+	const float gamma = 2.2;
+	vec3 color1 = texture(screenTex, texCoords).rgb;
+	vec3 color2 = texture(bloomTex, texCoords).rgb;
+	vec3 color = color1 + color2;
+	 
+	vec3 result = vec3(1.0) - exp(-color * exposure);
+    // also gamma correct while we're at it       
+    result = pow(result, vec3(1.0 / gamma));
+
+	FragColor = vec4(result, 1.0);
+}

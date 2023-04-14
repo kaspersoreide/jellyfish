@@ -24,7 +24,7 @@ void Jellyfish::createGeometry() {
         vec3 vertex = { cosf(theta) * sinf(phi), sinf(theta) * sinf(phi), cosf(phi) };
         if (vertex.z > 0.05 * sinf(8 * theta)) {
             vertices.push_back(vertex);
-            vertices.push_back({90.0f / 255, 134.0f / 255, 173.0f / 255});
+            vertices.push_back({90.0f / 255, 134.0f / 255, 1.5f + sinf(12 * theta) + 173.0f / 255});
         }
     }
     //generate "arms"
@@ -37,7 +37,7 @@ void Jellyfish::createGeometry() {
         for (int j = 0; j < k; j++) {
             float z = - 2.0 * float(j) / k;
             vertices.push_back({ x, y, z });
-            vertices.push_back({0.5, 0.2, 0.8});
+            vertices.push_back({1.5, 1.2, 1.8});
         }
     }
     VAO = vertexArray2x3f(vertices);
