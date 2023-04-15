@@ -29,13 +29,13 @@ void Jellyfish::createGeometry() {
     }
     //generate "arms"
     const int numArms = 8;
-    const int k = 50;
+    const int k = 90;
     for (int i = 0; i < numArms; i++) {
         float angle = i * 2.0 * PI / numArms;
         float x = 0.8 * cosf(angle);
         float y = 0.8 * sinf(angle);
         for (int j = 0; j < k; j++) {
-            float z = - 2.0 * float(j) / k;
+            float z = - 4.0 * float(j) / k;
             vertices.push_back({ x, y, z });
             vertices.push_back({1.5, 1.2, 1.8});
         }
