@@ -146,11 +146,11 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderer->clear();
 		auto t1 = Time::now();
     	fsec fs = t1 - t0;
 		moveCamera();
-		renderer->buffers[0]->bind();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		//cameraAngles.x += 0.001f;
 		View = glm::lookAt(
 			5.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
