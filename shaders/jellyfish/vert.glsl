@@ -19,7 +19,11 @@ float cosRange(float x, float ymin, float ymax) {
 }
 
 void main() {
-  vertexColor = color;
+  vertexColor = color + vec3(
+    cosRange(2 * t + 3 * pos.z, -1.0, 1.0),
+    0.0,
+    0.0  
+  );
   gl_Position = MVP * vec4(
     pos.x * cosRange(3 * t + 3 * pos.z, 0.7, 1.0), 
     pos.y * sinRange(3 * t + 3 * pos.z, 0.7, 1.0),

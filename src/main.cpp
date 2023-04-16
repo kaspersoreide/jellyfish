@@ -6,11 +6,10 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include "glm/gtc/matrix_transform.hpp"
-#include "framebuffer.h"
-#include "renderer.h"
 #include <chrono>
 
 #include "jellyfish.h"
+#include "renderer.h"
 
 using namespace glm;
 
