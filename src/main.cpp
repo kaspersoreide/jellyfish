@@ -79,7 +79,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void init() {
 	glfwInit();
-	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "<3", glfwGetPrimaryMonitor(), NULL);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "<3", NULL, NULL);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
@@ -149,12 +149,15 @@ int main() {
 	);
 	glm::mat4 VP = Projection * View;
 
+
+	auto t1 = Time::now();
+    	fsec fs = t1 - t0;
 	while (!glfwWindowShouldClose(window)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderer->clear();
-		auto t1 = Time::now();
-    	fsec fs = t1 - t0;
+		//auto t1 = Time::now();
+    	//fsec fs = t1 - t0;
 		moveCamera();
 		
 		//cameraAngles.x += 0.001f;

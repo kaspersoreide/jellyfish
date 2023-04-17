@@ -9,13 +9,11 @@ layout(location = 1) uniform float t;
 out vec3 vertexColor;
 
 float sinRange(float x, float ymin, float ymax) {
-  
   return 0.5 * (ymin + ymax) + 0.5 * (ymax - ymin) * sin(x);
 }
 
 float cosRange(float x, float ymin, float ymax) {
   return 0.5 * (ymin + ymax) + 0.5 * (ymax - ymin) * cos(x);
-
 }
 
 void main() {
@@ -25,7 +23,7 @@ void main() {
     0.0  
   );
   gl_Position = MVP * vec4(
-    pos.x * cosRange(3 * t + 3 * pos.z, 0.7, 1.0), 
+    pos.x * sinRange(3 * t + 3 * pos.z, 0.7, 1.0), 
     pos.y * sinRange(3 * t + 3 * pos.z, 0.7, 1.0),
     pos.z,
     1.0

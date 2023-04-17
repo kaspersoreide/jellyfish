@@ -12,9 +12,10 @@ void main() {
 	vec3 color1 = texture(screenTex, texCoords).rgb;
 	vec3 color2 = texture(bloomTex, texCoords).rgb;
 	vec3 color = color1 + color2;
-	 
+	
+	// map to range [0, 1]
 	vec3 result = vec3(1.0) - exp(-color * exposure);
-    // also gamma correct while we're at it       
+	// gamma correction
     result = pow(result, vec3(1.0 / gamma));
 
 	FragColor = vec4(result, 1.0);
