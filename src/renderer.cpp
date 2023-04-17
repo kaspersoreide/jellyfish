@@ -134,11 +134,8 @@ void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t) {
 }
 
 void Renderer::renderToScreen() {
-    //copyFramebuffer(colorBuffer, 0);
     copyFramebuffer(colorBuffer, pingpongFBO[0]);
-    bloom();
-    copyFramebuffer(pingpongTextures[0], 0);
-    /*
+
     for (int i = 0; i < 5; i++) bloom();
     
     glUseProgram(screenShader);
@@ -150,6 +147,4 @@ void Renderer::renderToScreen() {
     glBindTexture(GL_TEXTURE_2D, pingpongTextures[0]);
     drawFullscreenQuad();
     glActiveTexture(GL_TEXTURE0);
-    */
-    
 } 

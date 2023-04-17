@@ -150,19 +150,17 @@ int main() {
 	glm::mat4 VP = Projection * View;
 
 
-	auto t1 = Time::now();
-    	fsec fs = t1 - t0;
+	
 	while (!glfwWindowShouldClose(window)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		renderer->clear();
-		//auto t1 = Time::now();
-    	//fsec fs = t1 - t0;
+		auto t1 = Time::now();
+    	fsec fs = t1 - t0;
 		moveCamera();
 		
-		//cameraAngles.x += 0.001f;
 		View = glm::lookAt(
-			5.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
+			3.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
 			glm::vec3(0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
