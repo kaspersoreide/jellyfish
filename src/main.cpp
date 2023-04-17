@@ -1,24 +1,25 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_FORCE_RADIANS
 #include <iostream>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 #include <vector>
 #include "glm/gtc/matrix_transform.hpp"
-#include "framebuffer.h"
-#include "renderer.h"
 #include <chrono>
 
 #include "jellyfish.h"
+#include "renderer.h"
 
 using namespace glm;
 
 GLFWwindow* window;
 Renderer* renderer;
+
 struct {
 	float theta, phi;
 } cameraAngles;
+
 struct {
 	bool left, right, up, down;
 } controller;
@@ -78,18 +79,23 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void init() {
 	glfwInit();
-	window = glfwCreateWindow(1920, 1080, "<3", glfwGetPrimaryMonitor(), NULL);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "<3", NULL, NULL);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
-	glewInit();
+	gladLoadGL();
+    // Print various OpenGL information to stdout
+    printf("%s: %s\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+    printf("GLFW\t %s\n", glfwGetVersionString());
+    printf("OpenGL\t %s\n", glGetString(GL_VERSION));
+    printf("GLSL\t %s\n\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glfwSetKeyCallback(window, keyCallback);
 
 	renderer = new Renderer();
-	cameraAngles.phi = 3.1415926f / 2;
-	cameraAngles.theta = 0.0f;
+	cameraAngles.phi = 1.7f;
+	cameraAngles.theta = 0.05f;
 	controller.up = false;
 	controller.down = false;
 	controller.left = false;
@@ -115,8 +121,8 @@ void moveCamera() {
 vec3 getCameraPos(float phi, float theta) {
 	return {
 		sinf(phi) * cosf(theta),
-		sinf(phi) * sinf(theta),
-		cosf(phi)
+		cosf(phi),
+		sinf(phi) * sinf(theta)
 	};
 }
 
@@ -143,6 +149,8 @@ int main() {
 	);
 	glm::mat4 VP = Projection * View;
 
+
+	
 	while (!glfwWindowShouldClose(window)) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -151,11 +159,10 @@ int main() {
     	fsec fs = t1 - t0;
 		moveCamera();
 		
-		//cameraAngles.x += 0.001f;
 		View = glm::lookAt(
-			5.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
+			3.0f * getCameraPos(cameraAngles.phi, cameraAngles.theta),
 			glm::vec3(0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
+			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 		VP = Projection * View;
 

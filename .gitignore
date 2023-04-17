@@ -11,3 +11,11 @@ jellyfish.sln
 Win32
 Debug
 jellyfish.dir
+lib/arrrgh
+lib/fmt
+lib/glad
+lib/glfw
+lib/glm
+lib/lodepng
+lib/SFML
+lib/stb
