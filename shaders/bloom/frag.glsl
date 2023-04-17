@@ -75,8 +75,5 @@ void main() {
             color += weights[i] * texture(image, uv + vec2(pixelOffset.x * (i-M), 0.0)).rgb;
         }
     }
-
-    //color += 0.5 * vec3(texture(image, uv + vec2(0.0, 0.0)).r, 0.0, 0.0);
-    //color += 0.5 * vec3(0.0, 0.0, texture(image, uv + vec2(0.0, pixelOffset.y)).b);
     FragColor = vec4(1.1 * color, 1.0);
 }

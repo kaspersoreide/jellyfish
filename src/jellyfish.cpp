@@ -1,8 +1,8 @@
 #include "jellyfish.h"
 #include <math.h>
 #include <vector>
-#include <vertexarrays.h>
-#include "loadshaders.h"
+//#include <vertexarrays.h>
+#include "glutils.hpp"
 #define PI 3.14159265358979323846
 
 using namespace glm;
@@ -15,7 +15,7 @@ Jellyfish::Jellyfish() {
 void Jellyfish::createGeometry() {
 
     //generate points on a sphere by using fibonacci sphere algorithm
-    vector<vec3> vertices;
+    vector<vec3> vertices, colors;
     /*
     int n = 1000;
     const float goldenRatio = 0.5f * (1.0f + sqrtf(5.0f));
@@ -38,14 +38,14 @@ void Jellyfish::createGeometry() {
         for (int j = 0; j < density; j++) {
             float phi = j * 0.5f * PI / density;
             vertices.push_back({cosf(theta) * sinf(phi), sinf(theta) * sinf(phi), cosf(phi) - ringHeight});
-            vertices.push_back({10.0f / 255, 84.0f / 255, 1.5f + sinf(12 * theta)});
+            colors.push_back({10.0f / 255, 84.0f / 255, 1.5f + sinf(12 * theta)});
         }
     }
     for (int i = 0; i < ringDensity; i++) {
         float theta = 2 * i * PI / ringDensity;
         float heightFreq = numBands * 2 * i * PI / ringDensity;
         vertices.push_back({cosf(theta), sinf(theta), ringHeight * cosf(heightFreq + PI)});
-        vertices.push_back({90.0f / 255, 134.0f / 255, 1.5f + sinf(12 * theta) + 173.0f / 255});
+        colors.push_back({90.0f / 255, 134.0f / 255, 1.5f + sinf(12 * theta) + 173.0f / 255});
     }
     //generate "arms"
     const int numArms = 8;
@@ -57,9 +57,13 @@ void Jellyfish::createGeometry() {
         for (int j = 0; j < k; j++) {
             float z = - 3.0 * float(j) / k;
             vertices.push_back({ x, y, z });
-            vertices.push_back({1.0, 57.0f / 255, 64.0 / 255});
+            colors.push_back({1.0, 57.0f / 255, 64.0 / 255});
         }
     }
-    VAO = vertexArray2x3f(vertices);
+    //VAO = vertexArray2x3f(vertices);
+    glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+    generateAttribute(0, 3, vertices, false);
+    generateAttribute(1, 3, colors, false);
     numVertices = vertices.size();
 }

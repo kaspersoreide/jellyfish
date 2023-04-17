@@ -7,8 +7,8 @@ layout(location = 0) uniform sampler2D screenTex;
 layout(location = 1) uniform sampler2D bloomTex;
 
 void main() {
-	const float exposure = 0.5;
-	const float gamma = 2.2;
+	const float exposure = 2.5;
+	const float gamma = 1.2;
 	vec3 color1 = texture(screenTex, texCoords).rgb;
 	vec3 color2 = texture(bloomTex, texCoords).rgb;
 	vec3 color = color1 + color2;

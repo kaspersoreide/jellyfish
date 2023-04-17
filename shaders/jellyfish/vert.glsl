@@ -20,7 +20,7 @@ float cosRange(float x, float ymin, float ymax) {
 
 void main() {
   vertexColor = color + vec3(
-    cosRange(2 * t + 3 * pos.z, -1.0, 1.0),
+    cosRange(7 * t + 3 * pos.z, -1.0, 1.0),
     0.0,
     0.0  
   );

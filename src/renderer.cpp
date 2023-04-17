@@ -135,8 +135,7 @@ void Renderer::renderJellyfish(Jellyfish* jellyfish, glm::mat4 VP, float t) {
 
 void Renderer::renderToScreen() {
     copyFramebuffer(colorBuffer, pingpongFBO[0]);
-    for (int i = 0; i < 2; i++) bloom();
-    //copyFramebuffer(pingpongTextures[0], 0);
+    for (int i = 0; i < 5; i++) bloom();
     
     glUseProgram(screenShader);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
