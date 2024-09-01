@@ -8,8 +8,7 @@ Renderer::Renderer() {
     copyShader = loadShaders("shaders/copy/vert.glsl", "shaders/copy/frag.glsl");
 
     
-    // make hdr framebuffer with 2 color attachments
-    // 1 for dark and 1 for bright colors
+    // make hdr framebuffer for first rendering pass
     glGenFramebuffers(1, &hdrFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     glGenTextures(1, &colorBuffer);
